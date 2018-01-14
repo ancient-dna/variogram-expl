@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="ipynb_website:version" content="0.9.2" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" type="text/css" href="../css/jt.css">
+<link rel="stylesheet" type="text/css" href="../css/toc2.css">
+<link href="../site_libs/jqueryui-1.11.4/jquery-ui.css">
+<link rel="stylesheet" href="../site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="../site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<link rel="stylesheet"
+      href="../site_libs/highlight/textmate.css"
+      type="text/css" />
+<script src="../site_libs/highlight/highlight.js"></script>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+<script src="../js/toc2.js"></script>
+<script src="../js/docs.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+<script>
+    MathJax.Hub.Config({
+        extensions: ["tex2jax.js"],
+        jax: ["input/TeX", "output/HTML-CSS"],
+        tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+        processEscapes: true
+        },
+        "HTML-CSS": {
+            preferredFont: "TeX",
+            availableFonts: ["TeX"],
+            styles: {
+                scale: 110,
+                ".MathJax_Display": {
+                    "font-size": "110%",
+                }
+            }
+        }
+    });
+</script>
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+  // mark it active
+  menuAnchor.parent().addClass('active');
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+<div class="container-fluid main-container">
+<!-- tabsets -->
+<script src="../site_libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+<title>Variogram exploration</title>
+<style type = "text/css">
+body {
+  padding-top: 66px;
+  padding-bottom: 40px;
+}
+</style>
+</head>
+<body>
+<div tabindex="-1" id="notebook" class="border-box-sizing">
+<div class="container" id="notebook-container">
+<!-- code folding -->
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="../index.html">Variogram exploration</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+<li>
+  <a href="../license.html">License</a>
+</li>
+      </ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+   <a href="https://github.com/ancient-dna/variogram-expl"> source </a>
+</li>
+</ul>
+      </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Normal-approximations">Normal approximations<a class="anchor-link" href="#Normal-approximations">&#182;</a></h1><p><strong>authors:</strong> Joseph Marcus, Hussein Al-Asadi</p>
+<p>Here we explore a computationally efficient Empircal Bayes for modeling low-coverage sequence data. We are uncertain this approach will work but will explore it as it provides a tractable path forward for including read-level emissions in our work.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Generative-model">Generative model<a class="anchor-link" href="#Generative-model">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Consider the following generative model for read data in single individual $i$ at SNP $j$. To generate the data first we simulate an allele frequency trajectory under the Wright-Fisher model. We assume our inviduals are observed at different time-points stored in a $n$-vector $\mathbf{t}$. Let $\mathbf{f}_j(\mathbf{t})$ be the latent allele frequencies observed at these time points. Furthermore let $\mu_j$ be the mean of the process (the starting allele frequency of the Markov Chain) and $N_e$ be the effective population size. Given these frequencies we sample genotypes in an individual assuming Hardy-Weinberg equilibrium. Finally, given the genotypes we simulate read data which is the count of the derived allele. Here $c_{ij}$ is the total coverage.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>$$
+\begin{aligned}
+\mathbf{f}_j(\mathbf{t}) | \mu_j, N_e &amp;\sim WF(\mu_j, N_e) \\
+g_{ij} | f_{ij}(t_i) &amp;\sim Binomial\big(2, f_{ij}(t_i)\big) \\
+y_{ij} | g_{ij} &amp;\sim Binomial\Big(c_{ij}, \frac{g_{ij}}{2}\Big)
+\end{aligned}
+$$</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Approximation">Approximation<a class="anchor-link" href="#Approximation">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here we consider an approximation to the above generative model where we using normal approximations for each of the conditional distributions.</p>
+<p>$$
+\begin{aligned}
+\mathbf{f}_j(\mathbf{t}) | \mu_j, N_e &amp;\sim \mathcal{N}(\mu_j, \mathbf{\Sigma})\\
+\mathbf{g}_j | \mathbf{f}_j(\mathbf{t}) &amp;\sim \mathcal{N}\Big(2\mathbf{f}_j(\mathbf{t}), 2diag\big\{\mathbf{f}_j(\mathbf{t}) \cdot \big(\mathbf{1}-\mathbf{f}_j(\mathbf{t})\big)\big\}\Big) \\
+\mathbf{y}_j | \mathbf{g}_j &amp;\sim \mathcal{N}\Bigg(\mathbf{c}_j \cdot \mathbf{g}_j, diag\Big\{\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2} \cdot \Big(\mathbf{1}-\frac{\mathbf{g}_j}{2}\Big)\Big\}\Bigg)
+\end{aligned}
+$$</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>If we integrate out $\mathbf{f}_j(\mathbf{t})$</p>
+<p>$$
+\begin{aligned}
+\mathbb{E}(\mathbf{g}_j) &amp;= \mathbb{E}\Big(\mathbb{E}\big(\mathbf{g}_j | \mathbf{f}_j(\mathbf{t})\big)\Big) \\
+&amp;= \mathbb{E}\big(2\mathbf{f}_j(\mathbf{t})\big) \\
+&amp;= 2\mu_j\mathbf{1}
+\end{aligned}
+$$</p>
+<p>$$
+\begin{aligned}
+Var(\mathbf{g}_j) &amp;= Var\Big(\mathbb{E}\big(\mathbf{g}_j | \mathbf{f}_j(\mathbf{t})\big)\Big) + \mathbb{E}\Big(Var\big(\mathbf{g}_j | \mathbf{f}_j(\mathbf{t})\big)\Big) \\
+&amp;= 4Var\big(\mathbf{f}_j(\mathbf{t})\big) + \mathbb{E}\Big(2diag\big\{\mathbf{f}_j(\mathbf{t}) \cdot \big(\mathbf{1}-\mathbf{f}_j(\mathbf{t})\big)\big\}\Big)\\ 
+&amp;= \dots \\
+&amp;= \mu_j(1-\mu_j)\big(\mathbf{\Sigma} + diag\{\mathbf{\Sigma}\} + 2\mathbf{I}\big)
+\end{aligned}
+$$</p>
+<p>Thus we have</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>$$
+\mathbf{g}_j | \mu_j, N_e \sim \mathcal{N}\Big(2\mu_j\mathbf{1}, \mu_j(1-\mu_j)\big(\mathbf{\Sigma} + diag\{\mathbf{\Sigma}\} + 2\mathbf{I}\big)\Big)
+$$</p>
+<p>$$
+\mathbf{y}_j | \mathbf{g}_j \sim \mathcal{N}\Big(\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2}, diag\Big\{\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2} \cdot \Big(\mathbf{1}-\frac{\mathbf{g}_j}{2}\Big)\Big\}\Big)
+$$</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Our idea is to fix the variance in the likelihood ($\mathbf{y}_j | \mathbf{g}_j$) by computing an estimate of $\mathbf{g}_j$ from the data. Let $\mathbf{\Lambda}^{(j)} = diag\Big\{\mathbf{c}_j \cdot \frac{\hat{\mathbf{g}}_j}{2} \cdot \Big(\mathbf{1}-\frac{\hat{\mathbf{g}}_j}{2}\Big)\Big\}$ then we can rewrite the model as</p>
+<p>$$
+\mathbf{g}_j | \mu, N_e \sim \mathcal{N}\Big(2\mu_j\mathbf{1}, \mu_j(1-\mu_j)\big(\mathbf{\Sigma} + diag\{\mathbf{\Sigma}\} + 2\mathbf{I}\big)\Big)
+$$</p>
+<p>$$
+\mathbf{y}_j | \mathbf{g}_j \sim \mathcal{N}\Big(\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2}, \mathbf{\Lambda}^{(j)} \Big)
+$$</p>
+<p>to be clear $\mathbf{\Lambda}^{(j)}$ is fixed! Next we can integrate out $\mathbf{g}_j$ to obtain the marginal distribution of $\mathbf{y}$ conditional on $\mu_j, N_e$</p>
+<p>$$
+\begin{aligned}
+\mathbb{E}(\mathbf{y}_j) &amp;= \mathbb{E}\big(\mathbb{E}(\mathbf{y}_j | \mathbf{g}_j) \big) \\
+&amp;= \mathbf{c}_j \cdot \mathbb{E}\Big(\frac{\mathbf{g}_j}{2}\Big) \\
+&amp;=\mu_j\mathbf{c}_j 
+\end{aligned}
+$$</p>
+<p>$$
+\begin{aligned}
+Var(\mathbf{y}_j) &amp;= Var\big(\mathbb{E}(\mathbf{y}_j | \mathbf{g}_j)\big) + \mathbb{E}\big(Var(\mathbf{y}_j | \mathbf{g}_j)\big) \\
+&amp;= \mathbf{c}_j Var\big(\mathbf{g}_j\big)\mathbf{c}^T_j + \mathbb{E}\big(Var(\mathbf{y}_j | \mathbf{g}_j)\big) \\
+&amp;= \mathbf{c}_j\Big(\mu_j(1-\mu_j)\big(\mathbf{\Sigma} + diag\{\mathbf{\Sigma}\} + 2\mathbf{I}\big)\Big)\mathbf{c}^T_j + \mathbf{\Lambda}^{(j)}
+\end{aligned}
+$$</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Thus our marginal likelihood for $\mathbf{y}_j$</p>
+<p>$$
+\mathbf{y}_j | \mu_j, N_e \sim \mathcal{N}\Bigg(\mu_j \mathbf{c}_j, \mathbf{c}_j\Big(\mu_j(1-\mu_j)\big(\mathbf{\Sigma} + diag\{\mathbf{\Sigma}\} + 2\mathbf{I}\big)\Big)\mathbf{c}^T_j + \mathbf{\Lambda}^{(j)}\Bigg)
+$$</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We estimate $\mu_j$ and $N_e$ using maximum likelihood and plug them in to the full model to compute the posterior of $\mathbf{g}_j$ given $\mathbf{y}_j$ analytically!</p>
+</div>
+</div>
+</div>
+<hr>
+&copy; 2017 Peter Carbonetto &amp; Gao Wang
+</div>
+</div>
+</body>
+</html>
