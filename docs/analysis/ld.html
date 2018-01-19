@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="ipynb_website:version" content="0.9.2" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" type="text/css" href="../css/jt.css">
+<link rel="stylesheet" type="text/css" href="../css/toc2.css">
+<link href="../site_libs/jqueryui-1.11.4/jquery-ui.css">
+<link rel="stylesheet" href="../site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="../site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<link rel="stylesheet"
+      href="../site_libs/highlight/textmate.css"
+      type="text/css" />
+<script src="../site_libs/highlight/highlight.js"></script>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+<script src="../js/toc2.js"></script>
+<script src="../js/docs.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+<script>
+    MathJax.Hub.Config({
+        extensions: ["tex2jax.js"],
+        jax: ["input/TeX", "output/HTML-CSS"],
+        tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+        processEscapes: true
+        },
+        "HTML-CSS": {
+            preferredFont: "TeX",
+            availableFonts: ["TeX"],
+            styles: {
+                scale: 110,
+                ".MathJax_Display": {
+                    "font-size": "110%",
+                }
+            }
+        }
+    });
+</script>
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+  // mark it active
+  menuAnchor.parent().addClass('active');
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+<div class="container-fluid main-container">
+<!-- tabsets -->
+<script src="../site_libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+<title>Variogram exploration</title>
+<style type = "text/css">
+body {
+  padding-top: 66px;
+  padding-bottom: 40px;
+}
+</style>
+</head>
+<body>
+<div tabindex="-1" id="notebook" class="border-box-sizing">
+<div class="container" id="notebook-container">
+<!-- code folding -->
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="../index.html">Variogram exploration</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+<li>
+  <a href="../license.html">License</a>
+</li>
+      </ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+   <a href="https://github.com/ancient-dna/variogram-expl"> source </a>
+</li>
+</ul>
+      </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Linkage-disequlibrim">Linkage disequlibrim<a class="anchor-link" href="#Linkage-disequlibrim">&#182;</a></h1><p><strong>authors:</strong> Joseph Marcus, Hussein Al-Asadi</p>
+<p>In our previous work we emphasized modeling genotypes being generated under the Wright-Fisher Markov Chain. This allowed us to model correlations across time and learn interesting population genetic parameters. Unfortunately, a lot of ancient DNA data is sparse through time and the structure of these correlations can actually be quite complicated (a single population model with constant effective size is unlikely).</p>
+<p>Maybe if we can shift our focus on obtaining the posterior distribution on the genotypes given the read data, taking advantage of the correlation structure due to LD. This approach has a advantage in that we observe many strongly correlated obersvations along the chromsome (in the reference panel) and the correlation structure depends on recombination. Of course there are cavets in this approach if there is population strucutre in the reference panel or our ancient individual is strongly diverged from the reference panel but it seems worthwhile to explore.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Generative-model">Generative model<a class="anchor-link" href="#Generative-model">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Lets consider a single individual where we observe read data $p$ SNPs. Following Wen and Stephens 2010 we let $\mathbf{g}_i$ be a $p$ vector of genotypes for the $i$th individual whose modeled as multivariate normal distribution. The first two moments ($\mu$,$\mathbf{\Sigma}$) of the distribution are analytically derived from the Li and Stephens model and the sample covariance matrix of the reference panel is shrunk to be banded and sparse, allowing increased computationally efficiency for inversion.  We extend this framework by adding an additional emission for the read data in which we consider a Normal approximation to the Binomial likelihood which allows us to have major boosts in computation efficiency.</p>
+<p>$$
+\begin{aligned}
+\mathbf{g}_i | \sigma^2 &amp;\sim \mathcal{N}\big(\hat{\mathbf{\mu}}, \sigma^2\hat{\mathbf{\Sigma}} \big) \\
+\mathbf{y}_i | \mathbf{g}_i &amp;\sim \mathcal{N}\Bigg(\mathbf{c}_i \cdot \frac{\mathbf{g}_i}{2}, diag\Big(\mathbf{c_i} \cdot \frac{\mathbf{g}_i}{2} \big(1 - \frac{\mathbf{g}_i}{2}\big)\Big) \Bigg)
+\end{aligned}
+$$</p>
+<p>where $\mathbf{y}_i$ is a $p$ vector storing the number of reads that contain the counted allele, $\mathbf{c}_i$ is a $p$ vector storing the total number of reads.</p>
+<p>If we can somehow figure out a easy way to fix $diag\Big(\mathbf{c_i} \cdot \frac{\mathbf{g}_i}{2} \big(1 - \frac{\mathbf{g}_i}{2}\big)\Big)$ then we can take an Empirical Bayes approach obtaining the posterior distribution of the genotypes $\mathbf{g}_i | \mathbf{y}_i$ by integrating out $\mathbf{g}_i$ and using maximum likelihood to estimate $\sigma^2$. We can then plug in this point estimate into the model to obtain a conjugate update to compute the posterior distribution the genotypes given the read data. Note that this could be a highly parallelizable problem as we can compute posterior distributions in each individual separately and each chunk of a chromosome separately.</p>
+</div>
+</div>
+</div>
+<hr>
+&copy; 2017 Peter Carbonetto &amp; Gao Wang
+</div>
+</div>
+</body>
+</html>
