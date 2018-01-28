@@ -129,21 +129,30 @@ body {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Consider the following generative model for read data in single individual $i$ at SNP $j$. To generate the data first we simulate an allele frequency trajectory under the Wright-Fisher model. We assume our inviduals are observed at different time-points stored in a $n$-vector $\mathbf{t}$. Let $\mathbf{f}_j(\mathbf{t})$ be the latent allele frequencies observed at these time points. Furthermore let $\mu_j$ be the mean of the process (the starting allele frequency of the Markov Chain) and $N_e$ be the effective population size. Given these frequencies we sample genotypes in an individual assuming Hardy-Weinberg equilibrium. Finally, given the genotypes we simulate read data which is the count of the derived allele. Here $c_{ij}$ is the total coverage.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+<p>Consider the following generative model for read data in single individual $i$ at SNP $j$. To generate the data first we simulate an allele frequency trajectory under the Wright-Fisher model. We assume our individuals are observed at different time-points stored in a $n$-vector $\mathbf{t}$. Let $\mathbf{x}_{j}$ be a vector of latent allele counts in a single population at these time points. Furthermore, let $\mathbf{f}_{j} = \mathbf{x}_{j} \cdot \frac{1}{2N_e}$ be the allele frequencies and $N_e$ be the effective population size. Finally, Let $\mu_j$ be the mean of the process (the starting allele frequency of the Markov Chain). Given these frequencies we sample genotypes in an individual assuming Hardy-Weinberg equilibrium. Finally, given the genotypes we simulate read data which is the count of the derived allele. Here $c_{ij}$ is the total coverage.</p>
 <p>$$
 \begin{aligned}
-\mathbf{f}_j(\mathbf{t}) | \mu_j, N_e &amp;\sim WF(\mu_j, N_e) \\
-g_{ij} | f_{ij}(t_i) &amp;\sim Binomial\big(2, f_{ij}(t_i)\big) \\
+\mathbf{f}_j | \mu_j, N_e &amp;\sim WF(\mu_j, N_e) \\
+g_{ij} | f_{ij} &amp;\sim Binomial\big(2, f_{ij}\big) \\
 y_{ij} | g_{ij} &amp;\sim Binomial\Big(c_{ij}, \frac{g_{ij}}{2}\Big)
 \end{aligned}
 $$</p>
+<p>To motivate the normal approximation used later, we derive the mean and covariance matrix implied by the above model</p>
+<p>$$
+\begin{aligned}
+x_{j,t} | x_{j,t-1}, N_e &amp;\sim Binomial\Big(2N_e, \frac{x_{j,t-1}}{2N_e}\Big) \\
+E(x_{j,t}) &amp;= \mu_j \\
+Var(x_{j,t}) &amp;= \mu_j(1-\mu_j)\Bigg(1 - \Big(1 - \frac{1}{N_e}\Big)^t \Bigg) \approx \mu_j(1-\mu_j)\big(1-e^{\frac{-t}{2N_e}}\big) \\
+\Rightarrow \\
+E(f_{j,t}) &amp;= \frac{\mu_j}{2N_e} \\
+Var(f_{j,t}) &amp;= \frac{\mu_j(1-\mu_j)\big(1-e^{\frac{-t}{2N_e}}\big)}{2N_e} \approx \mu_j(1-\mu_j) \frac{t}{2N_e} \\
+Cov(f_{j,s}, f_{j,t}) &amp;= Cov\big(f_{j,s}, (f_{j,t} - f_{j,s}) + f_{j,s}\big) \\
+&amp;= Cov(f_{j,s}, f_{j,t} - f_{j,s}) + Cov(f_{j,s}, f_{j,s}) \\
+&amp;= Var(f_{j,s}) \\
+&amp;\approx \mu_j(1-\mu_j) \frac{s}{2N_e} 
+\end{aligned}
+$$</p>
+<p>Let $\mathbf{M}$ be a $n \times n$ matrix with $\mathbf{M}_{ij} = \frac{min(t_i, t_j)}{2N_e}$ storing the minimum times between each pair of individuals. We let the variance-covariance matrix $\mathbf{\Sigma} = \mu_j(1-\mu_j)\mathbf{M}$</p>
 </div>
 </div>
 </div>
@@ -159,11 +168,11 @@ $$</p>
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Here we consider an approximation to the above generative model where we using normal approximations for each of the conditional distributions.</p>
+<p>Here we consider an approximation to the above generative model where we using normal approximations for each of the conditional distributions. Note that we switch to continuous time as we use a Brownian Motion approximation to the discrete time Wright-Fisher Markov Chain.</p>
 <p>$$
 \begin{aligned}
-\mathbf{f}_j(\mathbf{t}) | \mu_j, N_e &amp;\sim \mathcal{N}(\mu_j, \mathbf{\Sigma})\\
-\mathbf{g}_j | \mathbf{f}_j(\mathbf{t}) &amp;\sim \mathcal{N}\Big(2\mathbf{f}_j(\mathbf{t}), 2diag\big\{\mathbf{f}_j(\mathbf{t}) \cdot \big(\mathbf{1}-\mathbf{f}_j(\mathbf{t})\big)\big\}\Big) \\
+\mathbf{f}_j(\mathbf{t}) | \mu_j, N_e &amp;\sim \mathcal{N}\big(\mu_j, \mu_j(1-\mu_j)\mathbf{M}\big)\\
+\mathbf{g}_j | \mathbf{f}_j(\mathbf{t}) &amp;\sim \mathcal{N}\Big(2\mathbf{f}_j(\mathbf{t}), diag\big\{2\mathbf{f}_j(\mathbf{t}) \cdot \big(\mathbf{1}-\mathbf{f}_j(\mathbf{t})\big)\big\}\Big) \\
 \mathbf{y}_j | \mathbf{g}_j &amp;\sim \mathcal{N}\Bigg(\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2}, diag\Big\{\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2} \cdot \Big(\mathbf{1}-\frac{\mathbf{g}_j}{2}\Big)\Big\}\Bigg)
 \end{aligned}
 $$</p>
@@ -185,9 +194,10 @@ $$</p>
 <p>$$
 \begin{aligned}
 Var(\mathbf{g}_j) &amp;= Var\Big(\mathbb{E}\big(\mathbf{g}_j | \mathbf{f}_j(\mathbf{t})\big)\Big) + \mathbb{E}\Big(Var\big(\mathbf{g}_j | \mathbf{f}_j(\mathbf{t})\big)\Big) \\
-&amp;= 4Var\big(\mathbf{f}_j(\mathbf{t})\big) + \mathbb{E}\Big(2diag\big\{\mathbf{f}_j(\mathbf{t}) \cdot \big(\mathbf{1}-\mathbf{f}_j(\mathbf{t})\big)\big\}\Big)\\ 
-&amp;= \dots \\
-&amp;= \mu_j(1-\mu_j)\big(\mathbf{\Sigma} + diag\{\mathbf{\Sigma}\} + 2\mathbf{I}\big)
+&amp;= 4Var\big(\mathbf{f}_j(\mathbf{t})\big) + \mathbb{E}\Big(diag\big\{2\mathbf{f}_j(\mathbf{t}) \cdot \big(\mathbf{1}-\mathbf{f}_j(\mathbf{t})\big)\big\}\Big)\\ 
+&amp;= 4\mu_j(1-\mu_j)\mathbf{M} + diag\Big\{2\mu_j(1-\mu_j)\Big(\mathbf{1}-\frac{\mathbf{t}}{2N_e}\Big)\Big\} \\
+&amp;= 4\mu_j(1-\mu_j)\mathbf{M} + 2\mu_j(1-\mu_j)\mathbf{I} - 2\mu_j(1-\mu_j)diag(\mathbf{M}) \\
+&amp;= 2\mu_j(1-\mu_j)\Big(2\mathbf{M} - 2diag(\mathbf{M}) + \mathbf{I}\big)
 \end{aligned}
 $$</p>
 <p>Thus we have</p>
@@ -199,11 +209,35 @@ $$</p>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>$$
-\mathbf{g}_j | \mu_j, N_e \sim \mathcal{N}\Big(2\mu_j\mathbf{1}, \mu_j(1-\mu_j)\big(\mathbf{\Sigma} + diag\{\mathbf{\Sigma}\} + 2\mathbf{I}\big)\Big)
+\mathbf{g}_j | \mu_j, N_e \sim \mathcal{N}\Big(2\mu_j\mathbf{1}, 2\mu_j(1-\mu_j)\big(2\mathbf{M} - 2diag(\mathbf{M}) + \mathbf{I}\big)\Big)
 $$</p>
 <p>$$
 \mathbf{y}_j | \mathbf{g}_j \sim \mathcal{N}\Big(\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2}, diag\Big\{\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2} \cdot \Big(\mathbf{1}-\frac{\mathbf{g}_j}{2}\Big)\Big\}\Big)
 $$</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>we will test this in simulation as first step fixing $\mu_j$ and $\mathbf{g}_j$ and estimate $N_e$</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<hr>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>tentative ...</p>
 </div>
 </div>
 </div>
