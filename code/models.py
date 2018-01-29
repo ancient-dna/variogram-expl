@@ -22,9 +22,12 @@ class NormalApproximation(object):
 
 
 
-    def _snp_likelihood(self, n_e, mu):
+    def _log_likelihood(self, n_e):
         """
         """
-        sigma = 4. * (mu * (1. - mu)) * (self.m / (2. * n_e))
         diag_idx = np.diag_indices(self.ancient_dataset.n, ndim=2)
-        sigma[diag_idx] = .5 * (sigma[diag_idx] + (mu * (1. - mu)))
+
+    def _snp_likelihood(self, y_j, c_j, mu_j, g_j, n_e):
+        """
+        """
+        pass

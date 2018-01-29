@@ -114,22 +114,7 @@ body {
 <div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="Normal-approximations">Normal approximations<a class="anchor-link" href="#Normal-approximations">&#182;</a></h1><p><strong>authors:</strong> Joseph Marcus, Hussein Al-Asadi</p>
 <p>Here we explore a computationally efficient Empircal Bayes for modeling low-coverage sequence data. We are uncertain this approach will work but will explore it as it provides a tractable path forward for including read-level emissions in our work.</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Generative-model">Generative model<a class="anchor-link" href="#Generative-model">&#182;</a></h2>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Consider the following generative model for read data in single individual $i$ at SNP $j$. To generate the data first we simulate an allele frequency trajectory under the Wright-Fisher model. We assume our individuals are observed at different time-points stored in a $n$-vector $\mathbf{t}$. Let $\mathbf{x}_{j}$ be a vector of latent allele counts in a single population at these time points. Furthermore, let $\mathbf{f}_{j} = \mathbf{x}_{j} \cdot \frac{1}{2N_e}$ be the allele frequencies and $N_e$ be the effective population size. Finally, Let $\mu_j$ be the mean of the process (the starting allele frequency of the Markov Chain). Given these frequencies we sample genotypes in an individual assuming Hardy-Weinberg equilibrium. Finally, given the genotypes we simulate read data which is the count of the derived allele. Here $c_{ij}$ is the total coverage.</p>
+<h2 id="Generative-model">Generative model<a class="anchor-link" href="#Generative-model">&#182;</a></h2><p>Consider the following generative model for read data in single individual $i$ at SNP $j$. To generate the data first we simulate an allele frequency trajectory under the Wright-Fisher model. We assume our individuals are observed at different time-points stored in a $n$-vector $\mathbf{t}$. Let $\mathbf{x}_{j}$ be a vector of latent allele counts in a single population at these time points. Furthermore, let $\mathbf{f}_{j} = \mathbf{x}_{j} \cdot \frac{1}{2N_e}$ be the allele frequencies and $N_e$ be the effective population size. Finally, Let $\mu_j$ be the mean of the process (the starting allele frequency of the Markov Chain). Given these frequencies we sample genotypes in an individual assuming Hardy-Weinberg equilibrium. Finally, given the genotypes we simulate read data which is the count of the derived allele. Here $c_{ij}$ is the total coverage.</p>
 <p>$$
 \begin{aligned}
 \mathbf{f}_j | \mu_j, N_e &amp;\sim WF(\mu_j, N_e) \\
@@ -153,22 +138,7 @@ Cov(f_{j,s}, f_{j,t}) &amp;= Cov\big(f_{j,s}, (f_{j,t} - f_{j,s}) + f_{j,s}\big)
 \end{aligned}
 $$</p>
 <p>Let $\mathbf{M}$ be a $n \times n$ matrix with $\mathbf{M}_{ij} = \frac{min(t_i, t_j)}{2N_e}$ storing the minimum times between each pair of individuals. We let the variance-covariance matrix $\mathbf{\Sigma} = \mu_j(1-\mu_j)\mathbf{M}$</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Approximation">Approximation<a class="anchor-link" href="#Approximation">&#182;</a></h2>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Here we consider an approximation to the above generative model where we using normal approximations for each of the conditional distributions. Note that we switch to continuous time as we use a Brownian Motion approximation to the discrete time Wright-Fisher Markov Chain.</p>
+<h2 id="Normal-approximation">Normal approximation<a class="anchor-link" href="#Normal-approximation">&#182;</a></h2><p>Here we consider an approximation to the above generative model where we using normal approximations for each of the conditional distributions. Note that we switch to continuous time as we use a Brownian Motion approximation to the discrete time Wright-Fisher Markov Chain.</p>
 <p>$$
 \begin{aligned}
 \mathbf{f}_j(\mathbf{t}) | \mu_j, N_e &amp;\sim \mathcal{N}\big(\mu_j, \mu_j(1-\mu_j)\mathbf{M}\big)\\
@@ -176,23 +146,12 @@ $$</p>
 \mathbf{y}_j | \mathbf{g}_j &amp;\sim \mathcal{N}\Bigg(\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2}, diag\Big\{\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2} \cdot \Big(\mathbf{1}-\frac{\mathbf{g}_j}{2}\Big)\Big\}\Bigg)
 \end{aligned}
 $$</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
 <p>If we integrate out $\mathbf{f}_j(\mathbf{t})$</p>
 <p>$$
 \begin{aligned}
 \mathbb{E}(\mathbf{g}_j) &amp;= \mathbb{E}\Big(\mathbb{E}\big(\mathbf{g}_j | \mathbf{f}_j(\mathbf{t})\big)\Big) \\
 &amp;= \mathbb{E}\big(2\mathbf{f}_j(\mathbf{t})\big) \\
-&amp;= 2\mu_j\mathbf{1}
-\end{aligned}
-$$</p>
-<p>$$
-\begin{aligned}
+&amp;= 2\mu_j\mathbf{1} \\
 Var(\mathbf{g}_j) &amp;= Var\Big(\mathbb{E}\big(\mathbf{g}_j | \mathbf{f}_j(\mathbf{t})\big)\Big) + \mathbb{E}\Big(Var\big(\mathbf{g}_j | \mathbf{f}_j(\mathbf{t})\big)\Big) \\
 &amp;= 4Var\big(\mathbf{f}_j(\mathbf{t})\big) + \mathbb{E}\Big(diag\big\{2\mathbf{f}_j(\mathbf{t}) \cdot \big(\mathbf{1}-\mathbf{f}_j(\mathbf{t})\big)\big\}\Big)\\ 
 &amp;= 4\mu_j(1-\mu_j)\mathbf{M} + diag\Big\{2\mu_j(1-\mu_j)\Big(\mathbf{1}-\frac{\mathbf{t}}{2N_e}\Big)\Big\} \\
@@ -201,91 +160,27 @@ Var(\mathbf{g}_j) &amp;= Var\Big(\mathbb{E}\big(\mathbf{g}_j | \mathbf{f}_j(\mat
 \end{aligned}
 $$</p>
 <p>Thus we have</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
 <p>$$
 \mathbf{g}_j | \mu_j, N_e \sim \mathcal{N}\Big(2\mu_j\mathbf{1}, 2\mu_j(1-\mu_j)\big(2\mathbf{M} - 2diag(\mathbf{M}) + \mathbf{I}\big)\Big)
 $$</p>
 <p>$$
 \mathbf{y}_j | \mathbf{g}_j \sim \mathcal{N}\Big(\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2}, diag\Big\{\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2} \cdot \Big(\mathbf{1}-\frac{\mathbf{g}_j}{2}\Big)\Big\}\Big)
 $$</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>we will test this in simulation as first step fixing $\mu_j$ and $\mathbf{g}_j$ and estimate $N_e$</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<hr>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>tentative ...</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Our idea is to fix the variance in the likelihood ($\mathbf{y}_j | \mathbf{g}_j$) by computing an estimate of $\mathbf{g}_j$ from the data. Let $\mathbf{\Lambda}^{(j)} = diag\Big\{\mathbf{c}_j \cdot \frac{\hat{\mathbf{g}}_j}{2} \cdot \Big(\mathbf{1}-\frac{\hat{\mathbf{g}}_j}{2}\Big)\Big\}$ then we can rewrite the model as</p>
-<p>$$
-\mathbf{g}_j | \mu, N_e \sim \mathcal{N}\Big(2\mu_j\mathbf{1}, \mu_j(1-\mu_j)\big(\mathbf{\Sigma} + diag\{\mathbf{\Sigma}\} + 2\mathbf{I}\big)\Big)
-$$</p>
-<p>$$
-\mathbf{y}_j | \mathbf{g}_j \sim \mathcal{N}\Big(\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2}, \mathbf{\Lambda}^{(j)} \Big)
-$$</p>
-<p>to be clear $\mathbf{\Lambda}^{(j)}$ is fixed! Next we can integrate out $\mathbf{g}_j$ to obtain the marginal distribution of $\mathbf{y}$ conditional on $\mu_j, N_e$</p>
+<p>Next we can integrate out $\mathbf{g}_j$ to obtain the marginal distribution of $\mathbf{y}_j$ conditional on $\mu_j, N_e$</p>
 <p>$$
 \begin{aligned}
 \mathbb{E}(\mathbf{y}_j) &amp;= \mathbb{E}\big(\mathbb{E}(\mathbf{y}_j | \mathbf{g}_j) \big) \\
 &amp;= \mathbf{c}_j \cdot \mathbb{E}\Big(\frac{\mathbf{g}_j}{2}\Big) \\
-&amp;=\mu_j\mathbf{c}_j 
-\end{aligned}
-$$</p>
-<p>$$
-\begin{aligned}
+&amp;=\mu_j\mathbf{c}_j \\
 Var(\mathbf{y}_j) &amp;= Var\big(\mathbb{E}(\mathbf{y}_j | \mathbf{g}_j)\big) + \mathbb{E}\big(Var(\mathbf{y}_j | \mathbf{g}_j)\big) \\
 &amp;= \mathbf{c}_j Var\big(\mathbf{g}_j\big)\mathbf{c}^T_j + \mathbb{E}\big(Var(\mathbf{y}_j | \mathbf{g}_j)\big) \\
-&amp;= \mathbf{c}_j\Big(\mu_j(1-\mu_j)\big(\mathbf{\Sigma} + diag\{\mathbf{\Sigma}\} + 2\mathbf{I}\big)\Big)\mathbf{c}^T_j + \mathbf{\Lambda}^{(j)}
+&amp;= \mathbf{c}_j\Big(2\mu_j(1-\mu_j)\big(2\mathbf{M} - 2diag(\mathbf{M}) + \mathbf{I}\big)\Big)\mathbf{c}^T_j + diag\Big\{\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2} \cdot \Big(\mathbf{1}-\frac{\mathbf{g}_j}{2}\Big)\Big\}
 \end{aligned}
 $$</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
 <p>Thus our marginal likelihood for $\mathbf{y}_j$</p>
 <p>$$
-\mathbf{y}_j | \mu_j, N_e \sim \mathcal{N}\Bigg(\mu_j \mathbf{c}_j, \mathbf{c}_j\Big(\mu_j(1-\mu_j)\big(\mathbf{\Sigma} + diag\{\mathbf{\Sigma}\} + 2\mathbf{I}\big)\Big)\mathbf{c}^T_j + \mathbf{\Lambda}^{(j)}\Bigg)
+\mathbf{y}_j | \mu_j, N_e \sim \mathcal{N}\Bigg(\mu_j \mathbf{c}_j, \mathbf{c}_j\Big(2\mu_j(1-\mu_j)\big(2\mathbf{M} - 2diag(\mathbf{M}) + \mathbf{I}\big)\Big)\mathbf{c}^T_j + diag\Big\{\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2} \cdot \Big(\mathbf{1}-\frac{\mathbf{g}_j}{2}\Big)\Big\}\Bigg)
 $$</p>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We estimate $\mu_j$ and $N_e$ using maximum likelihood and plug them in to the full model to compute the posterior of $\mathbf{g}_j$ given $\mathbf{y}_j$ analytically!</p>
 </div>
 </div>
 </div>
