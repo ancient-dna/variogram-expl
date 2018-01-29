@@ -13,27 +13,20 @@ class AncientDataset(object):
     ---------
     n : int
         number of individuals
-
     p : int
         number of snps
-
     alpha_f : float
         hyperparameter of beta distribution for
         simulating starting allele frequencies
-
     beta_f : float
         hyperparameter of beta distribution for
         simulating starting allele frequencies
-
     n_e : int
         effective population size
-
     mean_cov : int
         average coverage to simulate each site
-
     max_time : int
         the max time point for simulating an individual
-
     eps : float
         sequencing error rate
 
@@ -41,26 +34,36 @@ class AncientDataset(object):
     ----------
     n : int
         number of individuals
-
     p : int
         number of snps
-
     alpha_f : float
         hyperparameter of beta distribution for
         simulating starting allele frequencies
-
     beta_f : float
         hyperparameter of beta distribution for
         simulating starting allele frequencies
-
     n_e : int
         effective population size
-
     mean_cov : int
         average coverage to simulate each site
-
     max_time : int
             the max time point for simulating an individual
+    y : array
+        n x p matrix of read data
+    t : array
+        n vector of times for each individual
+    c : array
+        n x p matrix of total coverage
+    g : array
+        n x p genotype matrix
+    f : array
+        n_gen x p vector of allele frequencies
+    mu : array
+        p vector of starting allele frequencies
+    n_e : int
+        effective population size
+    eps : float
+        sequencing error rate
     """
     def __init__(self, n, p, alpha_f=.5, beta_f=.5,
                  n_e=10000, mean_cov=5, n_gen=2000,
@@ -86,10 +89,12 @@ class AncientDataset(object):
         self.n_gen = n_gen
 
         # simulate times for each individual
-        self.t = np.sort(np.random.randint(0., max_time, n))
+        self.t = np.sort(np.random.randint(0., self.n_gen, n))
 
         # simulate starting allele frequencies for each snp
         self.mu = np.random.beta(alpha_f, beta_f, p)
+
+        self.eps = eps
 
     def gen_freq(self):
         """Generate allele frequencies
