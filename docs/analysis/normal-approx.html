@@ -156,12 +156,12 @@ Var(\mathbf{g}_j) &amp;= Var\Big(\mathbb{E}\big(\mathbf{g}_j | \mathbf{f}_j(\mat
 &amp;= 4Var\big(\mathbf{f}_j(\mathbf{t})\big) + \mathbb{E}\Big(diag\big\{2\mathbf{f}_j(\mathbf{t}) \cdot \big(\mathbf{1}-\mathbf{f}_j(\mathbf{t})\big)\big\}\Big)\\ 
 &amp;= 4\mu_j(1-\mu_j)\mathbf{M} + diag\Big\{2\mu_j(1-\mu_j)\Big(\mathbf{1}-\frac{\mathbf{t}}{2N_e}\Big)\Big\} \\
 &amp;= 4\mu_j(1-\mu_j)\mathbf{M} + 2\mu_j(1-\mu_j)\mathbf{I} - 2\mu_j(1-\mu_j)diag(\mathbf{M}) \\
-&amp;= 2\mu_j(1-\mu_j)\Big(2\mathbf{M} - 2diag(\mathbf{M}) + \mathbf{I}\big)
+&amp;= 2\mu_j(1-\mu_j)\Big(2\mathbf{M} - diag(\mathbf{M}) + \mathbf{I}\big)
 \end{aligned}
 $$</p>
 <p>Thus we have</p>
 <p>$$
-\mathbf{g}_j | \mu_j, N_e \sim \mathcal{N}\Big(2\mu_j\mathbf{1}, 2\mu_j(1-\mu_j)\big(2\mathbf{M} - 2diag(\mathbf{M}) + \mathbf{I}\big)\Big)
+\mathbf{g}_j | \mu_j, N_e \sim \mathcal{N}\Big(2\mu_j\mathbf{1}, 2\mu_j(1-\mu_j)\big(2\mathbf{M} - diag(\mathbf{M}) + \mathbf{I}\big)\Big)
 $$</p>
 <p>$$
 \mathbf{y}_j | \mathbf{g}_j \sim \mathcal{N}\Big(\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2}, diag\Big\{\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2} \cdot \Big(\mathbf{1}-\frac{\mathbf{g}_j}{2}\Big)\Big\}\Big)
@@ -173,14 +173,11 @@ $$</p>
 &amp;= \mathbf{c}_j \cdot \mathbb{E}\Big(\frac{\mathbf{g}_j}{2}\Big) \\
 &amp;=\mu_j\mathbf{c}_j \\
 Var(\mathbf{y}_j) &amp;= Var\big(\mathbb{E}(\mathbf{y}_j | \mathbf{g}_j)\big) + \mathbb{E}\big(Var(\mathbf{y}_j | \mathbf{g}_j)\big) \\
-&amp;= \mathbf{c}_j Var\big(\mathbf{g}_j\big)\mathbf{c}^T_j + \mathbb{E}\big(Var(\mathbf{y}_j | \mathbf{g}_j)\big) \\
-&amp;= \mathbf{c}_j\Big(2\mu_j(1-\mu_j)\big(2\mathbf{M} - 2diag(\mathbf{M}) + \mathbf{I}\big)\Big)\mathbf{c}^T_j + diag\Big\{\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2} \cdot \Big(\mathbf{1}-\frac{\mathbf{g}_j}{2}\Big)\Big\}
+&amp;= \mathbf{c}_j\mathbf{c}^T_j \cdot Var\big(\mathbf{g}_j\big)+ \mathbb{E}\big(Var(\mathbf{y}_j | \mathbf{g}_j)\big) \\
+&amp;= \mathbf{c}_j \mathbf{c}^T_j \cdot \Big(2\mu_j(1-\mu_j)\big(2\mathbf{M} - diag(\mathbf{M}) + \mathbf{I}\big)\Big)+ \mathbf{c}_j \cdot \Bigg(\mu_j(1-\mu_j)\mathbf{I} - diag\Big\{\frac{1}{2}\mu_j(1-\mu_j)\big(2\mathbf{M} - diag(\mathbf{M}) + \mathbf{I}\big)\Big\}\Bigg)
 \end{aligned}
 $$</p>
 <p>Thus our marginal likelihood for $\mathbf{y}_j$</p>
-<p>$$
-\mathbf{y}_j | \mu_j, N_e \sim \mathcal{N}\Bigg(\mu_j \mathbf{c}_j, \mathbf{c}_j\Big(2\mu_j(1-\mu_j)\big(2\mathbf{M} - 2diag(\mathbf{M}) + \mathbf{I}\big)\Big)\mathbf{c}^T_j + diag\Big\{\mathbf{c}_j \cdot \frac{\mathbf{g}_j}{2} \cdot \Big(\mathbf{1}-\frac{\mathbf{g}_j}{2}\Big)\Big\}\Bigg)
-$$</p>
 </div>
 </div>
 </div>

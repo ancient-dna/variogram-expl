@@ -77,7 +77,7 @@ class NormalApproximation(object):
                 self.m[i, j] = np.min(np.array([self.t[i], self.t[j]]))
 
         # precompute component of covariance matrix that is resued in opt
-        self.sigma_m = (2.0 * self.m) - (2.0 * np.diag(np.diag(self.m))) + np.eye(self.n)
+        self.sigma_m = (2.0 * self.m) - np.diag(np.diag(self.m)) + np.eye(self.n)
 
     def fit(self):
         """Estimate n_e via maxium likelihood in this case we are starting
@@ -99,27 +99,27 @@ class NormalApproximation(object):
             negative log likelihood
         """
         # transform back to n_e
-        n_e = np.exp(z_e) + 1e-3
+        n_e = np.exp(z_e)
 
         # log likelihood
         ll = 0.0
 
         # loop over the snps
         for j in range(self.p):
-            ll += np.log(self._snp_lik(j, n_e))
+            ll += self._snp_log_lik(j, n_e)
 
         # minus log likelihood
         nll = -ll
         return(nll)
 
-    def _snp_lik(self, j, n_e):
+    def _snp_log_lik(self, j, n_e):
         """Likelihood for a single snp
 
         Arguments
         ---------
         j : int
             index of jth snp
-        n_e : fliat
+        n_e : float
             effective population size
 
         Returns
@@ -127,18 +127,20 @@ class NormalApproximation(object):
         l_j : float
             likelihood for a single snp
         """
+        c_j =  self.c[:, j]
+
         # heterozygosity at snp j
         h_j = 2.0 * self.mu[j] * (1.0 - self.mu[j])
 
         # first component of variance covaraince matrix
-        sigma_m = h_j * self.sigma_m / (2 * n_e)
+        sigma_m = h_j * (self.sigma_m / (2 * n_e))
 
         # covariance matrix of marginal likelihood
-        sigma_j0 = self.c[:, j] @ (sigma_m @ self.c[:, j].T)
-        sigma_j1 = self.c[:, j] * (self.g[:, j] / 2.0) * (1.0 - (self.g[:, j] / 2.0))
+        sigma_j0 = (c_j  @ c_j.T) * sigma_m
+        sigma_j1 = np.diag(c_j * (self.g[:, j] / 2.0) * (1.0 - (self.g[:, j] / 2.0)))
         sigma_j = sigma_j0 + sigma_j1
 
         # likelhood of jth snp
-        l_j = stats.multivariate_normal.pdf(x=self.y[:, j], mean=self.mu[j] * self.c[:, j], cov=sigma_j)
+        ll_j = stats.multivariate_normal.logpdf(x=self.y[:, j], mean=self.mu[j] * c_j, cov=sigma_j)
 
-        return(l_j)
+        return(ll_j)
