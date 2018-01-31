@@ -5,6 +5,7 @@ from __future__ import print_function
 import numpy as np
 import scipy.stats as stats
 from scipy.optimize import minimize
+from scipy.optimize import brent
 
 class NormalApproximation(object):
     """Estimate popgen parameters using a normal approximation
@@ -71,13 +72,12 @@ class NormalApproximation(object):
         self.n_e = ancient_dataset.n_e
 
         # n x n matrix storing min times for each pair including self pairs
-        self.m = np.empty((self.n, self.n))
+        self.T = np.empty((self.n, self.n))
         for i in range(self.n):
             for j in range(self.n):
-                self.m[i, j] = np.min(np.array([self.t[i], self.t[j]]))
+                self.T[i, j] = np.min(np.array([self.t[i], self.t[j]]))
 
-        # precompute component of covariance matrix that is resued in opt
-        self.sigma_m = (2.0 * self.m) - np.diag(np.diag(self.m)) + np.eye(self.n)
+        self.T_diag = np.diag(np.diag(self.T))
 
     def fit(self):
         """Estimate n_e via maxium likelihood in this case we are starting
@@ -127,20 +127,31 @@ class NormalApproximation(object):
         l_j : float
             likelihood for a single snp
         """
-        c_j =  self.c[:, j]
+        # coal rate
+        q = 1.0 / (2.0 * n_e)
 
         # heterozygosity at snp j
         h_j = 2.0 * self.mu[j] * (1.0 - self.mu[j])
 
-        # first component of variance covaraince matrix
-        sigma_m = h_j * (self.sigma_m / (2 * n_e))
+        #
+        tau_j = .5 * q * h_j
 
-        # covariance matrix of marginal likelihood
-        sigma_j0 = (c_j  @ c_j.T) * sigma_m
-        sigma_j1 = np.diag(c_j * (self.g[:, j] / 2.0) * (1.0 - (self.g[:, j] / 2.0)))
+        # first component of variance covaraince matrix
+        sigma_j0 = (((self.c[:, j] @ self.c[:, j].T) / 4.0) *
+                    (tau_j * ((4. * self.T) - (2. * self.T_diag)) + (h_j * np.eye(self.n)))
+                   )
+
+        # second component of variance covaraince matrix
+        sigma_j1 = ((np.diag(self.c[:, j]) / 2.0) *
+                    (.5 * h_j * np.eye(self.n)) - (tau_j * self.T_diag)
+                   )
+
+        # variance covariance matrix
         sigma_j = sigma_j0 + sigma_j1
 
+        print(sigma_j)
+
         # likelhood of jth snp
-        ll_j = stats.multivariate_normal.logpdf(x=self.y[:, j], mean=self.mu[j] * c_j, cov=sigma_j)
+        ll_j = stats.multivariate_normal.logpdf(x=self.y[:, j], mean=self.mu[j] * self.c[:, j], cov=sigma_j)
 
         return(ll_j)
