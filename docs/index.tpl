@@ -196,7 +196,7 @@ $(document).ready(function () {
 {%- endblock header -%}
 {% block footer %}
 <hr>
-&copy; 2017 Peter Carbonetto &amp; Gao Wang
+
 <!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
 
 </div>

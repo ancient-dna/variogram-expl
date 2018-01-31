@@ -6,7 +6,7 @@ name: "Variogram exploration"
 repo: "https://github.com/ancient-dna/variogram-expl"
 
 # Footer added to the bottom of some webpages.
-footer: "&copy; 2017 Peter Carbonetto &amp; Gao Wang"
+footer: ""
 
 # When set to True, populate the footer of each notebook with the git
 # commit id (SHA1) and commit modification date.

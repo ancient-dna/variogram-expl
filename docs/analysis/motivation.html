@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="ipynb_website:version" content="0.9.2" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" type="text/css" href="../css/jt.css">
+<link rel="stylesheet" type="text/css" href="../css/toc2.css">
+<link href="../site_libs/jqueryui-1.11.4/jquery-ui.css">
+<link rel="stylesheet" href="../site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="../site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<link rel="stylesheet"
+      href="../site_libs/highlight/textmate.css"
+      type="text/css" />
+<script src="../site_libs/highlight/highlight.js"></script>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+<script src="../js/toc2.js"></script>
+<script src="../js/docs.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+<script>
+    MathJax.Hub.Config({
+        extensions: ["tex2jax.js"],
+        jax: ["input/TeX", "output/HTML-CSS"],
+        tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+        processEscapes: true
+        },
+        "HTML-CSS": {
+            preferredFont: "TeX",
+            availableFonts: ["TeX"],
+            styles: {
+                scale: 110,
+                ".MathJax_Display": {
+                    "font-size": "110%",
+                }
+            }
+        }
+    });
+</script>
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+  // mark it active
+  menuAnchor.parent().addClass('active');
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+<div class="container-fluid main-container">
+<!-- tabsets -->
+<script src="../site_libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+<title>Variogram exploration</title>
+<style type = "text/css">
+body {
+  padding-top: 66px;
+  padding-bottom: 40px;
+}
+</style>
+</head>
+<body>
+<div tabindex="-1" id="notebook" class="border-box-sizing">
+<div class="container" id="notebook-container">
+<!-- code folding -->
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="../index.html">Variogram exploration</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+<li>
+  <a href="../license.html">License</a>
+</li>
+      </ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+   <a href="https://github.com/ancient-dna/variogram-expl"> source </a>
+</li>
+</ul>
+      </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Motivation">Motivation<a class="anchor-link" href="#Motivation">&#182;</a></h1><p><strong>authors:</strong> Joseph Marcus, Hussein Al-Asadi</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We're interested in addressing population continuity through time in population genetic / ancient DNA data. A great starting place to tackle this problem is to visualize the data! To this end we'd like to visualize the variogram for our data. Ideally, for each individual we would observe the age of the sample $t_i$ and their genotype at a single position in the genome $g_i$. The variogram is a plot of the expected genetic distance versus time lag for a pair of samples</p>
+<p>$$ 
+E\big((g_i - g_j)^2\big) \text{   vs.   } |t_i - t_j|
+$$</p>
+<p>$$
+g_i \in \{0,1,2\}
+$$</p>
+<p>to be clear we assume there are two alleles ($A$, $a$) at this location and $g_i$ denotes the count of the $A$ allele in sample $i$.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>However, in our data we don't observe genotypes, we observe sequence reads. To start, here we show a overly simple model to generate data</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>$$
+\begin{aligned}
+p(g_i = k) &amp;= \frac{1}{3}, k = \{0, 1, 2\} \\
+y_i | g_i &amp;\sim Binomial\big(c_{i}, \frac{g_i}{2}\big)
+\end{aligned}
+$$</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here $y_i$ denotes the count of reads carrying the $A$ allele and $c_i$ is the observed total number of reads. Typically $c_i$ is 0 i.e. there is a lot of missing data. Now we can get some traction in visualizing the variogram by conditioning on the data we observe</p>
+<p>$$
+E\big((g_i - g_j)^2 | y_i, y_j\big) = \sum_{g_i \in \{0, 1, 2\}} \sum_{g_j \in \{0, 1, 2\}} (g_i - g_j)^2 p(g_i, g_j) = \sum_{g_i \in \{0, 1, 2\}} \sum_{g_j \in \{0, 1, 2\}} (g_i - g_j)^2 p(g_i) p(g_j)
+$$</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>show plots!</strong></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Of course, we'd like to use our biological knowledge of the generative process, particularly the fact that two individuals sampled close in time should have more similar genotypes than two people sampled far apart in time. Now, let $\mathbf{f}(\mathbf{t})$ be the frequency of the $A$ allele for the $n$ samples observed at different time points.</p>
+<p>A standard model for the allele frequencies is</p>
+<p>$$
+\mathbf{f}(\mathbf{t}) | \mu, \theta \sim \mathcal{N}\big(\mathbf{\mu}, \mathbf{\Sigma}(\mathbf{t}; \theta)\big)
+$$</p>
+<p>Given these frequencies we can make some simplifying approximations to estimate the variogram</p>
+<p>$$
+\begin{aligned}
+\mathbf{g} | \mathbf{f}(\mathbf{t}) &amp;\sim \mathcal{N}\Bigg(2\mathbf{f}(\mathbf{t}), diag\Big(2\mathbf{f}(\mathbf{t}) \odot \big(\mathbf{1}-\mathbf{f}(\mathbf{t})\big)\Big)\Bigg) \\ 
+y_i | \tilde{g}_i &amp;\sim Binomial\Big(c_i, \frac{\tilde{g}_i}{2}\Big)
+\end{aligned}
+$$</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>where $\tilde{g}_i \in \{0, 1, 2\}$ denotes the rounded genotype and $\odot$ represents element wise multiplication. <em>See Wen and Stephens 2010 for inspiration on the normal approximation to the genotypes and rounding trick.</em> Recall, we are not interested in estimating $\mathbf{f}(\mathbf{t})$ so we integrate out of the model</p>
+<p>$$
+\mathbf{g} | \mu, \theta \sim \mathcal{N}\Big(2\mu, \Phi(\mathbf{t}; \theta)\Big)
+$$</p>
+<p>where $\Phi(\mathbf{t}; \theta) = Var\Big(\mathbb{E}\big(\mathbf{g} | \mathbf{f}(\mathbf{t})\big)\Big) + \mathbb{E}\Big(Var\big(\mathbf{g} | \mathbf{f}(\mathbf{t})\big)\Big)$. Rewriting our marginal model</p>
+<p>$$
+\begin{aligned}
+\mathbf{g} | \mu, \theta &amp;\sim \mathcal{N}\Big(2\mu, \Phi(\mathbf{t}; \theta)\Big) \\
+y_i | \tilde{g}_i &amp;\sim Binomial\Big(c_i, \frac{\tilde{g}_i}{2}\Big)
+\end{aligned}
+$$</p>
+<p>Now we would like to estimate our model parameters $\mu$ and $\theta$ by maximum likelihood. We can maximize the marginal likelihood, however this requires a sum over the discretized genotypes which is computationally intractable</p>
+<p>$$
+\begin{aligned}
+p(\mathbf{y} | \mu, \theta) &amp;= \sum_\tilde{\mathbf{g}} p(\mathbf{y} | \tilde{\mathbf{g}}, \mu, \theta) p(\tilde{\mathbf{g}} | \mu, \theta) \\
+&amp;= \sum_\tilde{\mathbf{g}} \prod_{i=1}^n p(y_i|\tilde{g}_i, \mu, \theta)p(\tilde{\mathbf{g}} | \mu, \theta) 
+\end{aligned}
+$$</p>
+<p>Note that the sum over the rounded genotype will have $3^n$ terms! Thus it is intractable for any reasonable data. Therefore we need to come up with a another strategy to compute or approximate the marginal likelihood. Note that</p>
+<p>$$
+\sum_\tilde{\mathbf{g}} \prod_{i=1}^n p(y_i|\tilde{g}_i, \mu, \theta)p(\tilde{\mathbf{g}} | \mu, \theta) = E_{\tilde{\mathbf{g}}}\Big(\prod_{i=1}^n p(y_i|\tilde{g}_i, \mu, \theta)\Big)
+$$</p>
+<p>Perhaps this motivates a monte carlo approach to estimate this expectation.</p>
+</div>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</body>
+</html>

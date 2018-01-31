@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="ipynb_website:version" content="0.9.2" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" type="text/css" href="../css/jt.css">
+<link rel="stylesheet" type="text/css" href="../css/toc2.css">
+<link href="../site_libs/jqueryui-1.11.4/jquery-ui.css">
+<link rel="stylesheet" href="../site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="../site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="../site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<link rel="stylesheet"
+      href="../site_libs/highlight/textmate.css"
+      type="text/css" />
+<script src="../site_libs/highlight/highlight.js"></script>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+<script src="../js/toc2.js"></script>
+<script src="../js/docs.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+<script>
+    MathJax.Hub.Config({
+        extensions: ["tex2jax.js"],
+        jax: ["input/TeX", "output/HTML-CSS"],
+        tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+        processEscapes: true
+        },
+        "HTML-CSS": {
+            preferredFont: "TeX",
+            availableFonts: ["TeX"],
+            styles: {
+                scale: 110,
+                ".MathJax_Display": {
+                    "font-size": "110%",
+                }
+            }
+        }
+    });
+</script>
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+  // mark it active
+  menuAnchor.parent().addClass('active');
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+<div class="container-fluid main-container">
+<!-- tabsets -->
+<script src="../site_libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+<title>Variogram exploration</title>
+<style type = "text/css">
+body {
+  padding-top: 66px;
+  padding-bottom: 40px;
+}
+</style>
+</head>
+<body>
+<div tabindex="-1" id="notebook" class="border-box-sizing">
+<div class="container" id="notebook-container">
+<!-- code folding -->
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="../index.html">Variogram exploration</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+<li>
+  <a href="../license.html">License</a>
+</li>
+      </ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+   <a href="https://github.com/ancient-dna/variogram-expl"> source </a>
+</li>
+</ul>
+      </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pysam</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">vcf</span> <span class="o">=</span> <span class="n">pysam</span><span class="o">.</span><span class="n">VariantFile</span><span class="p">(</span><span class="s1">&#39;/project/jnovembre/jhmarcus/ancient-sardinia/output/vcf/ancient_sardinia_full26_trm.vcf.gz&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">samples</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">vcf</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span>
+<span class="c1">#cnt = 0</span>
+<span class="c1">#for rec in vcf.fetch():</span>
+<span class="c1">#    cnt += 1</span>
+<span class="c1">#nsnps = cnt</span>
+<span class="n">nsnps</span> <span class="o">=</span> <span class="mi">1151240</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">),</span> <span class="n">nsnps</span><span class="p">)</span>
+<span class="n">l_00</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+<span class="n">l_01</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+<span class="n">l_11</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>(26, 1151240)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">vcf</span><span class="o">.</span><span class="n">fetch</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)):</span>
+        <span class="n">l_00</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">samples</span><span class="p">[</span><span class="n">samples</span><span class="p">[</span><span class="n">s</span><span class="p">]][</span><span class="s2">&quot;GL&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">l_01</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">samples</span><span class="p">[</span><span class="n">samples</span><span class="p">[</span><span class="n">s</span><span class="p">]][</span><span class="s2">&quot;GL&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">l_11</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">samples</span><span class="p">[</span><span class="n">samples</span><span class="p">[</span><span class="n">s</span><span class="p">]][</span><span class="s2">&quot;GL&quot;</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">p_00</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">l_00</span><span class="p">)</span>
+<span class="n">p_01</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">l_01</span><span class="p">)</span>
+<span class="n">p_11</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">l_11</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">),</span> <span class="n">nsnps</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">P</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_00</span> <span class="o">/</span> <span class="p">(</span><span class="n">p_00</span> <span class="o">+</span> <span class="n">p_01</span> <span class="o">+</span> <span class="n">p_11</span><span class="p">)</span>
+<span class="n">P</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_01</span> <span class="o">/</span> <span class="p">(</span><span class="n">p_00</span> <span class="o">+</span> <span class="n">p_01</span> <span class="o">+</span> <span class="n">p_11</span><span class="p">)</span>
+<span class="n">P</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_11</span> <span class="o">/</span> <span class="p">(</span><span class="n">p_00</span> <span class="o">+</span> <span class="n">p_01</span> <span class="o">+</span> <span class="n">p_11</span><span class="p">)</span>
+<span class="c1"># check number of SNPs</span>
+<span class="p">(</span><span class="n">P</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.8</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="n">P</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.8</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="n">P</span><span class="p">[:,:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.8</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt output_prompt">Out[9]:</div>
+<div class="output_text output_subarea output_execute_result">
+<pre>3723730</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> Cython
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="n">cython</span>
+<span class="k">cimport</span> <span class="nn">cython</span>
+<span class="k">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="k">cimport</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="nd">@cython</span><span class="o">.</span><span class="n">boundscheck</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+<span class="nd">@cython</span><span class="o">.</span><span class="n">wraparound</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+<span class="k">cpdef</span> <span class="kt">double</span> <span class="nf">compute_distance</span><span class="p">(</span><span class="nb">int</span> <span class="n">i</span><span class="p">,</span> <span class="nb">int</span> <span class="n">j</span><span class="p">,</span> <span class="n">double</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="n">P</span><span class="p">):</span>
+    <span class="k">cdef</span> <span class="kt">double</span> <span class="nf">d</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">cdef</span> <span class="kt">int</span> <span class="nf">nsnps</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mf">1</span><span class="p">]</span>
+    <span class="k">cdef</span> <span class="kt">int</span> <span class="nf">l</span>  <span class="o">=</span> <span class="mf">0</span>
+    <span class="k">cdef</span> <span class="kt">int</span> <span class="nf">k1</span> <span class="o">=</span> <span class="mf">0</span>
+    <span class="k">cdef</span> <span class="kt">int</span> <span class="nf">k2</span> <span class="o">=</span> <span class="mf">0</span>
+    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nsnps</span><span class="p">):</span>
+         <span class="k">for</span> <span class="n">k1</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0</span><span class="p">,</span><span class="mf">1</span><span class="p">,</span><span class="mf">2</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">k2</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0</span><span class="p">,</span><span class="mf">1</span><span class="p">,</span><span class="mf">2</span><span class="p">]:</span>
+                <span class="n">d</span> <span class="o">+=</span> <span class="p">(</span><span class="n">k1</span><span class="o">-</span><span class="n">k2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">k1</span><span class="o">-</span><span class="n">k2</span><span class="p">)</span> <span class="o">*</span> <span class="n">P</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">k1</span><span class="p">]</span> <span class="o">*</span> <span class="n">P</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">k2</span><span class="p">]</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">D</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)):</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">compute_distance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span> <span class="n">P</span><span class="p">)</span>
+            <span class="n">D</span><span class="p">[</span><span class="n">j</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">D</span> <span class="o">/</span> <span class="n">nsnps</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="mi">1</span><span class="p">,])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="prompt output_prompt">Out[26]:</div>
+<div class="output_text output_subarea output_execute_result">
+<pre>(array([ 1.,  0.,  0.,  0.,  0.,  0.,  1.,  7.,  2., 15.]),
+ array([1.19114256, 1.20590084, 1.22065912, 1.23541741, 1.25017569,
+        1.26493397, 1.27969226, 1.29445054, 1.30920883, 1.32396711,
+        1.33872539]),
+ &lt;a list of 10 Patch objects&gt;)</pre>
+</div>
+</div>
+<div class="output_area">
+<div class="prompt"></div>
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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
+"
+>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s1">&#39;anc_sards.diffs&#39;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%1.3f</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">outfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;anc_sards.id&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+<span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">samples</span><span class="p">))</span>
+<span class="n">outfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+</div>
+</body>
+</html>

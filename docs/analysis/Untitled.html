@@ -112,8 +112,8 @@ body {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Normal-approximations">Normal approximations<a class="anchor-link" href="#Normal-approximations">&#182;</a></h1><p><strong>authors:</strong> Joseph Marcus, Hussein Al-Asadi</p>
-<p>Here we explore a computationally efficient Empircal Bayes for modeling low-coverage sequence data. We are uncertain this approach will work but will explore it as it provides a tractable path forward for including read-level emissions in our work.</p>
+<h1 id="Normal-approximations-pt-2">Normal approximations pt 2<a class="anchor-link" href="#Normal-approximations-pt-2">&#182;</a></h1><p><strong>authors:</strong> Joseph Marcus, Hussein Al-Asadi</p>
+<p>... <em>not so normal</em> ;)</p>
 <h2 id="Generative-model">Generative model<a class="anchor-link" href="#Generative-model">&#182;</a></h2><p>Consider the following generative model for read data in single individual $i$ at SNP $j$. To generate the data first we simulate an allele frequency trajectory under the Wright-Fisher model. We assume our individuals are observed at different time-points stored in a $n$-vector $\mathbf{t}$. Let $\mathbf{x}_{j}$ be a vector of latent allele counts in a single population at these time points. Furthermore, let $\mathbf{f}_{j} = \mathbf{x}_{j} \odot \frac{1}{2N_e}$ be the allele frequencies and $N_e$ be the effective population size. Finally, Let $\mu_j$ be the mean of the process (the starting allele frequency of the Markov Chain). Given these frequencies we sample genotypes in an individual assuming Hardy-Weinberg equilibrium. Finally, given the genotypes we simulate read data which is the count of the derived allele. Here $c_{ij}$ is the total coverage.</p>
 <p>$$
 \begin{aligned}
@@ -137,15 +137,15 @@ Cov(f_{j,s}, f_{j,t}) &amp;= Cov\big(f_{j,s}, (f_{j,t} - f_{j,s}) + f_{j,s}\big)
 \end{aligned}
 $$</p>
 <p>Let $\mathbf{T}$ be a $n \times n$ matrix with $\mathbf{T}_{ij} = min(t_i, t_j)$ storing the minimum times between each pair of individuals. We let the variance-covariance matrix $\mathbf{\Sigma} = \frac{\mu_j(1-\mu_j)}{2N_e} \mathbf{T}$</p>
-<h2 id="Normal-approximation">Normal approximation<a class="anchor-link" href="#Normal-approximation">&#182;</a></h2><p>Here we consider an approximation to the above generative model where we using normal approximations for each of the conditional distributions. Note that we switch to continuous time as we use a Brownian Motion approximation to the discrete time Wright-Fisher Markov Chain.</p>
+<h2 id="Normal-approximation">Normal approximation<a class="anchor-link" href="#Normal-approximation">&#182;</a></h2><p>Here we consider an approximation to the above generative model where we using normal approximations for each of the conditional distributions except for the data emission layer. Note that we switch to continuous time as we use a Brownian Motion approximation to the discrete time Wright-Fisher Markov Chain.</p>
 <p>$$
 \begin{aligned}
 \mathbf{f}_j(\mathbf{t}) | \mu_j, N_e &amp;\sim \mathcal{N}\Big(\mu_j, \frac{\mu_j(1-\mu_j)}{2N_e}\mathbf{T}\Big) \\
 \mathbf{g}_j | \mathbf{f}_j(\mathbf{t}) &amp;\sim \mathcal{N}\Big(2\mathbf{f}_j(\mathbf{t}), diag\big\{2\mathbf{f}_j(\mathbf{t}) \odot \big(\mathbf{1}-\mathbf{f}_j(\mathbf{t})\big)\big\}\Big) \\
-\mathbf{y}_j | \mathbf{g}_j &amp;\sim \mathcal{N}\Bigg(\mathbf{c}_j \odot \frac{\mathbf{g}_j}{2}, diag\Big\{\mathbf{c}_j \odot \frac{\mathbf{g}_j}{2} \odot \Big(\mathbf{1}-\frac{\mathbf{g}_j}{2}\Big)\Big\}\Bigg)
+y_{ij} | g_{ij} &amp;\sim Binomial\Big(c_{ij}, \frac{[g_{ij}]}{2}\Big)
 \end{aligned}
 $$</p>
-<p>If we integrate out $\mathbf{f}_j(\mathbf{t})$</p>
+<p>One might ask how can we use $g_{ij}$ as a frequency if we assume its normally distributed? Here we make the simplifying computational convenience to round $g_{ij}$, represented as $[g_{ij}]$, to be in $\{0,1,2\}$. First lets find the marginal distribution on of $\mathbf{g}_j$</p>
 <p>$$
 \begin{aligned}
 \mathbb{E}(\mathbf{g}_j) &amp;= \mathbb{E}\Big(\mathbb{E}\big(\mathbf{g}_j | \mathbf{f}_j(\mathbf{t})\big)\Big) \\
@@ -163,49 +163,9 @@ $$</p>
 <p>$$
 \mathbf{g}_j | \mu_j, N_e \sim \mathcal{N}\Bigg(2\mu_j\mathbf{1}, \frac{\mu_j(1-\mu_j)}{2N_e} \Big(4\mathbf{T} - 2diag(\mathbf{T})\Big) + 2\mu_j(1-\mu_j)\mathbf{I}\Bigg)
 $$</p>
+<p>Next we write the maginal distribution of each individual's genotype</p>
 <p>$$
-\mathbf{y}_j | \mathbf{g}_j \sim \mathcal{N}\Big(\mathbf{c}_j \odot \frac{\mathbf{g}_j}{2}, diag\Big\{\mathbf{c}_j \odot \frac{\mathbf{g}_j}{2} \odot \Big(\mathbf{1}-\frac{\mathbf{g}_j}{2}\Big)\Big\}\Big)
-$$</p>
-<hr>
-<p>Next we can integrate out $\mathbf{g}_j$ to obtain the marginal distribution of $\mathbf{y}_j$ conditional on $\mu_j, N_e$</p>
-<p>$$
-\begin{aligned}
-\mathbb{E}(\mathbf{y}_j) &amp;= \mathbb{E}\big(\mathbb{E}(\mathbf{y}_j | \mathbf{g}_j) \big) \\
-&amp;= \mathbf{c}_j \odot \mathbb{E}\Big(\frac{\mathbf{g}_j}{2}\Big) \\
-&amp;=\mathbf{c}_j\mu_j \\
-Var(\mathbf{y}_j) &amp;= Var\big(\mathbb{E}(\mathbf{y}_j | \mathbf{g}_j)\big) + \mathbb{E}\big(Var(\mathbf{y}_j | \mathbf{g}_j)\big) \\
-&amp;= Var\Big(\mathbf{c}_j \odot \frac{\mathbf{g}_j}{2}\Big)\\
-&amp;= \frac{\mathbf{c}_j\mathbf{c}^T_j}{4} \odot Var\big(\mathbf{g}_j\big)+ \mathbb{E}\big(Var(\mathbf{y}_j | \mathbf{g}_j)\big) \\
-&amp;= \frac{\mathbf{c}_j \mathbf{c}^T_j}{4} \odot \Bigg(\frac{\mu_j(1-\mu_j)}{2N_e} \Big(4\mathbf{T} - 2diag(\mathbf{T})\Big) + 2\mu_j(1-\mu_j)\mathbf{I}\big)\Bigg) + \mathbb{E}\big(Var(\mathbf{y}_j | \mathbf{g}_j)\big) \\
-\Rightarrow
-\end{aligned}
-$$</p>
-<p>$$
-\begin{aligned}
-\mathbb{E}\big(Var(\mathbf{y}_j | \mathbf{g}_j)\big) &amp;= \mathbb{E}\Bigg(diag\Big\{\mathbf{c}_j \odot \frac{\mathbf{g}_j}{2} \odot \Big(\mathbf{1}-\frac{\mathbf{g}_j}{2}\Big)\Big\}\Bigg) \\
-\end{aligned}
-$$</p>
-<p>We can consider each individual separately here thus ...</p>
-<p>$$
-\begin{aligned}
-\mathbb{E}\Big(c_{ij}\frac{g_{ij}}{2}\big(1 - \frac{g_{ij}}{2}\big)\Big) &amp;= c_{ij} \mathbb{E}\Big(\frac{g_{ij}}{2} - \frac{g^2_{ij}}{4}\Big) \\
-&amp;= c_{ij}\Big(\frac{1}{2}E(g_{ij}) - \frac{1}{4}E(g^2_{ij})\Big) \\
-&amp;= c_{ij}\Big(\frac{1}{2}2\mu_j - \frac{1}{4}\big(Var(g_{ij}) + E(g_{ij})^2\big)\Big) \\
-&amp;= c_{ij}\Big(\mu_j - \frac{1}{4}\big(Var(g_{ij}) + 4\mu^2_j\big)\Big) \\
-&amp;= c_{ij}\Big(\mu_j(1-\mu_j) - \frac{1}{4}Var(g_{ij}) \Big) \\
-&amp;= c_{ij}\Bigg(\mu_j(1-\mu_j) - \frac{1}{4}\Big(\frac{\mu_j(1 - \mu_j)}{2N_e}(4t_i - 2t_i) + 2\mu_j(1-\mu_j) \Big)\Bigg) \\
-&amp;= c_{ij}\Bigg(\mu_j(1-\mu_j) - \frac{1}{4}\Big(2\frac{\mu_j(1 - \mu_j)}{2N_e}t_i + 2\mu_j(1-\mu_j) \Big)\Bigg) \\
-&amp;= c_{ij}\Bigg(\mu_j(1-\mu_j) - \frac{1}{2}\frac{\mu_j(1 - \mu_j)}{2N_e}t_i - \frac{1}{2}\mu_j(1-\mu_j)\Bigg) \\
-&amp;= \frac{c_{ij}}{2}\Bigg(\mu_j(1-\mu_j) - \frac{\mu_j(1 - \mu_j)}{2N_e}t_i \Bigg)
-\end{aligned}
-$$</p>
-<p>Thus our marginal variance is</p>
-<p>$$
-Var(\mathbf{y}_j) = \frac{\mathbf{c}_j \mathbf{c}^T_j}{4} \odot \Bigg(\frac{\mu_j(1-\mu_j)}{2N_e} \Big(4\mathbf{T} - 2diag(\mathbf{T})\Big) + 2\mu_j(1-\mu_j)\mathbf{I}\big)\Bigg) + \frac{\mathbf{c}_j}{2} \odot \Bigg(\mu_j(1-\mu_j)\mathbf{I} - \frac{\mu_j(1-\mu_j)}{2N_e}diag(\mathbf{T}) \Bigg)
-$$</p>
-<p>Finally our marginal distribution is</p>
-<p>$$
-\mathbf{y}_j | \mu_j, N_e \sim \mathcal{N}\Bigg(\mathbf{c}_j\mu_j, \frac{\mathbf{c}_j \mathbf{c}^T_j}{4} \odot \Bigg(\frac{\mu_j(1-\mu_j)}{2N_e} \Big(4\mathbf{T} - 2diag(\mathbf{T})\Big) + 2\mu_j(1-\mu_j)\mathbf{I}\big)\Bigg) + \frac{\mathbf{c}_j}{2} \odot \Bigg(\mu_j(1-\mu_j)\mathbf{I} - \frac{\mu_j(1-\mu_j)}{2N_e}diag(\mathbf{T}) \Bigg) \Bigg)
+g_{ij} \sim \mathcal{N}\Big(2\mu_j, 2\mu_j(1-\mu_j) \big(\frac{t_i}{2 N_e} + 1)\big)\Big)
 $$</p>
 </div>
 </div>

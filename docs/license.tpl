@@ -137,7 +137,7 @@ body {
 
 {% block footer %}
 <hr>
-&copy; 2017 Peter Carbonetto &amp; Gao Wang
+
 </div>
 </div>
 </body>
